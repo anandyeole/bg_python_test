@@ -1,0 +1,40 @@
+title: BuildGrid Configuration (RabbitMQ)
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  description:
+    type: string
+
+  server:
+    type: object
+
+  instances:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+
+        description:
+          type: string
+
+        storages:
+          type: array
+          items:
+            type: storage
+
+        caches:
+          type: array
+          items:
+            type: cache
+
+        services:
+          type: array
+      required:
+        - name
+        - services
+
+required:
+  - server

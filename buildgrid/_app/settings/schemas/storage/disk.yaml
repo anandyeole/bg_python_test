@@ -1,0 +1,9 @@
+title: Disk Storage backend
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  path:
+    type: string
+required:
+  - path

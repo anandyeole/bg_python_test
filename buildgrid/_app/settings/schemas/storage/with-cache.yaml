@@ -1,0 +1,16 @@
+title: With Cache Storage backend
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  cache:
+    type: storage
+  fallback:
+    type: storage
+  defer-fallback-writes:
+    type: boolean
+  fallback-writer-threads:
+    type: integer
+required:
+  - cache
+  - fallback

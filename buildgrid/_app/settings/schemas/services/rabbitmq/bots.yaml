@@ -1,0 +1,35 @@
+title: BuildGrid Bots Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  rabbitmq:
+    type: rabbitmq-connection
+  logstream:
+    type: object
+    properties:
+      url:
+        type: string
+      instance-name:
+        type: string
+      credentials:
+        type: object
+        properties:
+          tls-client-key:
+            type: string
+          tls-client-cert:
+            type: string
+          tls-server-cert:
+            type: string
+        required:
+          - tls-client-key
+          - tls-client-cert
+          - tls-server-cert
+    required:
+      - url
+      - instance-name
+  platform-queues-file:
+    type: string
+required:
+  - rabbitmq
+  - platform-queues-file

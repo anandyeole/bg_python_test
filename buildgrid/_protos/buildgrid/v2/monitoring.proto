@@ -1,0 +1,98 @@
+// Copyright (C) 2018 Bloomberg LP
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  <http://www.apache.org/licenses/LICENSE-2.0>
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package buildgrid.v2;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+message BusMessage {
+  // The position of this message in the bus stream.
+  int64 sequence_number = 1;
+
+  // The carried message.
+  oneof record {
+    LogRecord log_record = 2;
+    MetricRecord metric_record = 3;
+  }
+}
+
+message LogRecord {
+  // When the record has been created.
+  google.protobuf.Timestamp creation_timestamp = 1;
+
+  enum Level {
+    NOTSET = 0;
+    // Debug message severity level.
+    DEBUG = 1;
+    // Information message severity level.
+    INFO = 2;
+    // Warning message severity level.
+    WARNING = 3;
+    // Error message severity level.
+    ERROR = 4;
+    // Critical message severity level.
+    CRITICAL = 5;
+  }
+
+  // The domain name for the record.
+  string domain = 2;
+
+  // The severity level of the record.
+  Level level = 3;
+
+  // The human-readable record's message.
+  string message = 4;
+
+  // An optional list of additional metadata.
+  map<string, string> metadata = 5;
+}
+
+message MetricRecord {
+  // When the metric has been created.
+  google.protobuf.Timestamp creation_timestamp = 1;
+
+  enum Type {
+    NONE = 0;
+    // A metric for counting.
+    COUNTER = 1;
+    // A metric for measuring a duration.
+    TIMER = 2;
+    // A metric in arbitrary value.
+    GAUGE = 3;
+    // A metric distribution semantics
+    DISTRIBUTION = 4;
+  }
+
+  // The type of metric, see Type.
+  Type type = 3;
+
+  // The name identifying the metric.
+  string name = 4;
+
+  // The carried value, depending on the metric's type.
+  oneof data {
+    // Set for Type.COUNTER and Type.DISTRIBUTION metrics.
+    float count = 5;
+    // Set for Type.TIMER metrics.
+    google.protobuf.Duration duration = 6;
+    // Set for Type.GAUGE metrics.
+    float value = 7;
+  }
+
+  // An optional list of additional metadata.
+  map<string, string> metadata = 8;
+}

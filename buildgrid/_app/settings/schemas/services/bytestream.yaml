@@ -1,0 +1,18 @@
+title: BuildGrid ByteStream Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+  stream-storage:
+    type: streamstorage
+  read-only:
+    type: boolean
+  disable-overwrite-early-return:
+    type: boolean
+anyOf:
+  - required:
+    - storage
+  - required:
+    - stream-storage

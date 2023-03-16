@@ -1,0 +1,38 @@
+title: BuildGrid Redis Action Cache configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+  allow-updates:
+    type: boolean
+  cache-failed-actions:
+    type: boolean
+  host:
+    type: string
+  port:
+    type: integer
+  password:
+    type: string
+  db:
+    type: integer
+  dns-srv-record:
+    type: string
+  sentinel-master-name:
+    type: string
+  retries:
+    type: integer
+    minimum: 0
+  entry-type:
+    type: string
+  migrate-entries:
+    type: bool
+required:
+  - storage
+oneOf:
+  - required:
+    - host
+    - port
+  - required:
+    - dns-srv-record

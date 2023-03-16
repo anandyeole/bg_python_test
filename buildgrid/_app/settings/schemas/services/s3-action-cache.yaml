@@ -1,0 +1,29 @@
+title: BuildGrid S3 Action Cache Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+  allow-updates:
+    type: boolean
+  cache-failed-actions:
+    type: boolean
+  entry-type:
+    type: string
+  migrate-entries:
+    type: bool
+  bucket:
+    type: string
+  endpoint:
+    type: string
+  access-key:
+    type: string
+  secret-key:
+    type: string
+required:
+  - storage
+  - bucket
+  - endpoint
+  - access-key
+  - secret-key

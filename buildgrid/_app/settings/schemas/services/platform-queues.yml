@@ -1,0 +1,19 @@
+title: BuildGrid Bots service queue bindings by platform
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  platform-queues:
+    type: array
+    items:
+      type: object
+      properties:
+        platform:
+          type: string
+        queues:
+          type: array
+          items:
+            type: string
+      required:
+        - platform
+        - queues

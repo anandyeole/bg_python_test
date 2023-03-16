@@ -1,0 +1,85 @@
+title: SQL scheduler backend
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+  connection-string:
+    type: string
+  automigrate:
+    type: boolean
+  connection-timeout:
+    type: number
+    minimum: 0
+  poll-interval:
+    type: number
+    minimum: 0
+  pool-size:
+    type: integer
+    minimum: 1
+  max-overflow:
+    type: integer
+    minimum: 0
+  pool-timeout:
+    type: number
+    minimum: 0
+  pool-pre-ping:
+    type: boolean
+  pool-recycle:
+    type: number
+    minimum: 0
+  connect-args:
+    type: object
+  pruner-job-max-age:
+    type: object
+    properties:
+      weeks:
+        type: number
+        format: float
+        minimum: 0
+      days:
+        type: number
+        format: float
+        minimum: 0
+      hours:
+        type: number
+        format: float
+        mininum: 0
+      minutes:
+        type: number
+        format: float
+        mininum: 0
+      seconds:
+        type: number
+        format: float
+        mininum: 0
+  pruner-period:
+    type: object
+    properties:
+      weeks:
+        type: number
+        format: float
+        minimum: 0
+      days:
+        type: number
+        format: float
+        minimum: 0
+      hours:
+        type: number
+        format: float
+        mininum: 0
+      minutes:
+        type: number
+        format: float
+        mininum: 0
+      seconds:
+        type: number
+        format: float
+        mininum: 0
+  pruner-max-delete-window:
+    type: integer
+    minimum: 1
+
+required:
+  - storage

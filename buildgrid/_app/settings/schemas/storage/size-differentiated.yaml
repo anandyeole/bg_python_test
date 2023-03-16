@@ -1,0 +1,24 @@
+title: Size Differentiated Storage backend
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  size-limited-storages:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      properties:
+        max-size:
+          type: string
+          pattern: ^[0-9]*[kKmMgGtTbB]?[bB]?$
+        storage:
+          type: storage
+      required:
+        - max-size
+        - storage
+  fallback:
+    type: storage
+required:
+  - size-limited-storages
+  - fallback

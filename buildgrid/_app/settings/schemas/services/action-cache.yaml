@@ -1,0 +1,28 @@
+title: BuildGrid Action Cache Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  cache:
+    type: cache
+
+  # The following properties are all deprecated, and should be given
+  # to an !lru-action-cache instead.
+  storage:
+    type: storage
+  max-cached-refs:
+    type: integer
+    minimum: 1
+  allow-updates:
+    type: boolean
+  cache-failed-actions:
+    type: boolean
+
+oneOf:
+  - required:
+      - cache
+
+  # The deprecated format has some required fields if used.
+  - required:
+      - storage
+      - max-cached-refs

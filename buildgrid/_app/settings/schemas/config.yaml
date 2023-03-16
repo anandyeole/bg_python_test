@@ -1,0 +1,133 @@
+title: BuildGrid Configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  description:
+    type: string
+
+  server:
+    type: array
+
+  authorization:
+    type: object
+    properties:
+      method:
+        type: string
+        enum:
+          - none
+          - jwt
+
+      secret:
+        type: string
+
+      algorithm:
+        type: string
+        enum:
+          - hs256
+          - rs256
+
+      jwks-url:
+        type: string
+
+      audience:
+        type: string
+
+      jwks-fetch-minutes:
+        type: integer
+
+    if:
+      properties:
+        method:
+          const: jwt
+    then:
+      required:
+        - algorithm
+      oneOf:
+        - required:
+          - secret
+        - required:
+          - jwks-url
+          - audience
+
+  instances:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+
+        description:
+          type: string
+
+        storages:
+          type: array
+          items:
+            type: storage
+
+        caches:
+          type: array
+          items:
+            type: cache
+
+        schedulers:
+          type: array
+          items:
+            type: scheduler
+
+        services:
+          type: array
+          items:
+            oneOf:
+              - type: "!execution"
+              - type: "!bots"
+              - type: "!cas"
+              - type: "!bytestream"
+              - type: "!reference-cache"
+              - type: "!action-cache"
+              - type: "!logstream"
+              - type: "!memory-build-events"
+              # These are deprecated, but still allowed
+              - type: "!s3action-cache"
+              - type: "!write-once-action-cache"
+      required:
+        - name
+        - services
+
+  monitoring:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+
+      endpoint-type:
+        type: string
+        enum:
+          - stdout
+          - file
+          - socket
+          - udp
+
+      endpoint-location:
+        type: string
+
+      serialization-format:
+        type: string
+        enum:
+          - binary
+          - json
+          - statsd
+
+      metric-prefix:
+        type: string
+
+  thread-pool-size:
+    type: integer
+    minimum: 5
+
+  server-reflection:
+    type: boolean
+required:
+  - server
+  - instances

@@ -1,0 +1,18 @@
+title: S3 Storage backend
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  bucket:
+    type: string
+  endpoint:
+    type: string
+  access-key:
+    type: string
+  secret-key:
+    type: string
+required:
+  - bucket
+  - endpoint
+  - access-key
+  - secret-key

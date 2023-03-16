@@ -1,0 +1,16 @@
+title: With Cache ActionCache backend
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  cache:
+    type: cache
+  fallback:
+    type: cache
+  cache-failed-actions:
+    type: boolean
+  allow-updates:
+    type: boolean
+required:
+  - cache
+  - fallback

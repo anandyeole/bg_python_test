@@ -1,0 +1,32 @@
+title: BuildGrid Channel configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  address:
+    type: string
+  port:
+    type: integer
+  insecure-mode:
+    type: boolean
+  credentials:
+    type: object
+    properties:
+      tls-server-key:
+        type: string
+      tls-server-cert:
+        type: string
+      tls-client-certs:
+        type: string
+    required:
+      - tls-server-key
+      - tls-server-cert
+required:
+  - insecure-mode
+
+# Backwards compatibility with the `port` property:
+oneOf:
+  - required:
+    - address
+  - required:
+    - port

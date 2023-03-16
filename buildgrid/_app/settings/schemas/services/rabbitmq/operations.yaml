@@ -1,0 +1,17 @@
+title: BuildGrid Operations Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  rabbitmq:
+    type: rabbitmq-connection
+  instance-name:
+    instance-name: string
+  max-list-operations-page-size:
+    type: number
+    minimum: 1
+  data-store:
+    type: operations-sql-data-store
+
+required:
+  - rabbitmq

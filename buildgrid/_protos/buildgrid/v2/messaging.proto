@@ -1,0 +1,126 @@
+// Copyright (C) 2021 Bloomberg LP
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  <http://www.apache.org/licenses/LICENSE-2.0>
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package buildgrid.v2;
+
+import "build/bazel/remote/execution/v2/remote_execution.proto";
+import "google/longrunning/operations.proto";
+import "google/protobuf/timestamp.proto";
+
+// Describes an individual execution of a specific Action. Serialized
+// and published on the Execution exchange.
+message Job {
+  // The unique ID of this specific execution of the Action. This MUST be
+  // unique within the grid at any given time, since it identifies a
+  // deliberately separate execution of an Action.
+  string job_id = 1;
+
+  // The Action to execute for this Job. The same Action can be used in
+  // multiple Jobs, for example an uncacheable Action being run multiple
+  // times simultaneously.
+  build.bazel.remote.execution.v2.Action action = 2;
+}
+
+// Message to indicate that a new Operation is being created for a Job.
+message CreateOperation {
+  // Job ID that the Operation refers to. If this is an ID which has been
+  // used before then Operations services MUST treat this message as a
+  // request to bind the Operation name to the existing Job.
+  string job_id = 1;
+
+  // The name of the Operation being created. This MUST be unique within
+  // the grid at any given time, since it identifies a specific client with
+  // an interest in the execution of a Job.
+  string operation_name = 2;
+
+  // The Digest of the Action used in the Job. Services MUST use this
+  // digest when constructing Operation messages with the given name for
+  // response to clients.
+  build.bazel.remote.execution.v2.Digest action_digest = 3;
+
+  // Whether or not the result of the Action specified by the action_digest
+  // can be stored in the ActionCache. Execution services SHOULD use this
+  // to efficiently maintain a cache of Jobs which can have future requests
+  // deduplicated into them.
+  bool cacheable = 4;
+
+  // The time at which this message was generated. Operations services
+  // SHOULD use this information to ensure in-order updating of persistent
+  // Operation state.
+  google.protobuf.Timestamp timestamp = 5;
+
+  // Optional metadata that a client could have attached to the
+  // execution request. It serves to describe an external context of
+  // that request.
+  build.bazel.remote.execution.v2.RequestMetadata request_metadata = 6;
+}
+
+// Message containing an update to Operations related to a specific Job.
+message UpdateOperations {
+  // The ID of the Job whose Operations should be updated to match the new
+  // state.
+  string job_id = 1;
+
+  // The new state of Operations for the Job. The `operation_state.name` is
+  // expected to be empty and will be ignored if set.
+  google.longrunning.Operation operation_state = 2;
+
+  // Whether or not the result of the Action specified by the action_digest
+  // in the operation_state can be stored in the ActionCache. Execution
+  // services SHOULD use this to efficiently maintain a cache of Jobs which
+  // can have future requests deduplicated into them, and ActionCache
+  // services SHOULD use this to determine whether or not the result stored
+  // in operation_state can be added to the cache in situations where the
+  // Job has been completed.
+  bool cacheable = 3;
+
+  // The time at which this message was generated. Operation services
+  // SHOULD use this information to ensure in-order updating of persistent
+  // Operation state.
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+// A message containing the information required to retry a Job which is
+// currently being executed by a worker.
+message RetryableJob {
+  // The unique ID of the Job that the worker is executing.
+  string job_id = 1;
+
+  // The Action to execute for this Job.
+  build.bazel.remote.execution.v2.Action action = 2;
+
+  // The routing key used when this Job was originally published on the
+  // Execution exchange. This can be used to requeue the Job in the
+  // correct platform queue.
+  string routing_key = 3;
+}
+
+// A message describing the last-known state of a bot.
+message BotStatus {
+  // The server-assigned name for this bot.
+  string bot_name = 1;
+
+  // A list of RetryableJobs that this bot is currently working on, and would
+  // need to be retried or cancelled in the case of this bot failing to report
+  // back to the grid.
+  repeated RetryableJob assignments = 2;
+
+  // The timestamp of the last time the bot was seen connecting to the grid.
+  // The BotMonitor service SHOULD use this timestamp to determine that a
+  // bot has failed to meet its next connection deadline to trigger retrying
+  // the related Jobs.
+  google.protobuf.Timestamp connection_timestamp = 3;
+}

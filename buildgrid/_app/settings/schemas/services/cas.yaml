@@ -1,0 +1,11 @@
+title: BuildGrid CAS Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+  read-only:
+    type: boolean
+required:
+  - storage

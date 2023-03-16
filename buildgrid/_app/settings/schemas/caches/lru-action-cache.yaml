@@ -1,0 +1,17 @@
+title: BuildGrid LRU Action Cache configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+  max-cached-refs:
+    type: integer
+    minimum: 1
+  allow-updates:
+    type: boolean
+  cache-failed-actions:
+    type: boolean
+required:
+  - storage
+  - max-cached-refs

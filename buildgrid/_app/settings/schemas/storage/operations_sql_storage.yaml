@@ -1,0 +1,14 @@
+title: SQL storage backend for Operations
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+  connection-string:
+    type: string
+  automigrate:
+    type: boolean
+  connection-timeout:
+    type: number
+    minimum: 0

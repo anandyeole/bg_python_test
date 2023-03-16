@@ -1,0 +1,9 @@
+title: In-memory scheduler backend
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+required:
+  - storage

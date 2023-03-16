@@ -1,0 +1,10 @@
+title: LRU Storage backend
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  size:
+    type: string
+    pattern: ^[0-9]*[kKmMgGtTbB]?[bB]?$
+required:
+  - size

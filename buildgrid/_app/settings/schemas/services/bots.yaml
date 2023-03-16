@@ -1,0 +1,45 @@
+title: BuildGrid Bots Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+  action-cache:
+    oneOf:
+      - type: cache
+      - type: "!action-cache"
+  scheduler:
+    type: scheduler
+  data-store:
+    type: scheduler
+  bot-session-keepalive-timeout:
+    type: number
+    minimum: 1
+  permissive-bot-session:
+    type: boolean
+  logstream:
+    type: object
+    properties:
+      url:
+        type: string
+      instance-name:
+        type: string
+      credentials:
+        type: object
+        properties:
+          tls-client-key:
+            type: string
+          tls-client-cert:
+            type: string
+          tls-server-cert:
+            type: string
+        required:
+          - tls-client-key
+          - tls-client-cert
+          - tls-server-cert
+    required:
+      - url
+      - instance-name
+required:
+  - storage

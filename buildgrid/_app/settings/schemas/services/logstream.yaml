@@ -1,0 +1,7 @@
+title: BuildGrid LogStream Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  prefix:
+    type: string

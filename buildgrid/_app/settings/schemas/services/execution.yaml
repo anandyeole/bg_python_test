@@ -1,0 +1,76 @@
+title: BuildGrid Execution Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  storage:
+    type: storage
+  action-cache:
+    oneOf:
+      - type: cache
+      - type: "!action-cache"
+  action-browser-url:
+    type: string
+  scheduler:
+    type: scheduler
+  data-store:
+    type: scheduler
+  property-keys:
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+  wildcard-property-keys:
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+  operation-stream-keepalive-timeout:
+    type: number
+    minimum: 1
+  bot-session-keepalive-timeout:
+    type: number
+    minimum: 1
+  endpoints:
+    type: array
+    items:
+      type: string
+      enum:
+        - execution
+        - operations
+        - bots
+  discard-unwatched-jobs:
+    type: boolean
+  max-execution-timeout:
+    type: number
+    minimum: 1
+  max-list-operations-page-size:
+    type: number
+    minimum: 1
+  logstream:
+    type: object
+    properties:
+      url:
+        type: string
+      instance-name:
+        type: string
+      credentials:
+        type: object
+        properties:
+          tls-client-key:
+            type: string
+          tls-client-cert:
+            type: string
+          tls-server-cert:
+            type: string
+        required:
+          - tls-client-key
+          - tls-client-cert
+          - tls-server-cert
+    required:
+      - url
+      - instance-name
+required:
+  - storage

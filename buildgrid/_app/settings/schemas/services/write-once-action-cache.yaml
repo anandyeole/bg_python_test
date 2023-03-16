@@ -1,0 +1,15 @@
+title: BuildGrid Write Once Action Cache Service configuration
+type: object
+propertyNames:
+  pattern: "^[A-Za-z0-9-]*$"
+properties:
+  action-cache:
+    # TODO: This should be able to be a single type once
+    # https://gitlab.com/BuildGrid/buildgrid/-/issues/290
+    # is resolved
+    oneOf:
+      - type: "!action-cache"
+      - type: "!s3action-cache"
+      - type: "!remote-action-cache"
+required:
+  - action-cache

@@ -1,0 +1,265 @@
+##
+# Server's configuration desciption.
+description: |
+  BuildGrid's server reference configuration.
+
+##
+# Server's network configuration.
+server:
+  - !channel
+    ##
+    # TCP port number.
+    port: 50051
+    ##
+    # Whether or not to activate SSL/TLS encryption.
+    insecure-mode: true
+    ##
+    # SSL/TLS credentials.
+    credentials:
+      tls-server-key: !expand-path ~/.config/buildgrid/server.key
+      tls-server-cert: !expand-path ~/.config/buildgrid/server.cert
+      tls-client-certs: !expand-path ~/.config/buildgrid/client.cert
+
+##
+# Server's authorization configuration.
+authorization:
+  ##
+  # Type of authorization method.
+  #  none  - Bypass the authorization mechanism
+  #  jwt   - OAuth 2.0 bearer with JWT tokens
+  method: jwt
+  ##
+  # Location for the file containing the secret, pass
+  # or key needed by 'method' to authorize requests.
+  secret: !expand-path ~/.config/buildgrid/auth.secret
+  ##
+  # The url to fetch the JWKs.
+  # Either secret or this field must be specified. Defaults to ``None``.
+  jwks-url: https://test.dev/.well-known/jwks.json
+  ##
+  # Audience used to validate the JWT.
+  # This field must be specified if jwks-url is specified.
+  # This field is case sensitive!
+  audience: BuildGrid
+  ##
+  # The amount of time between fetching of the JWKs.
+  # Defaults to 60 minutes.
+  jwks-fetch-minutes: 30
+  ##
+  # Encryption algorithm to be used together with 'secret'
+  # by 'method' to authorize requests (optinal).
+  #  hs256  - HMAC+SHA-256 for JWT method
+  #  rs256  - RSASSA-PKCS1-v1_5+SHA-256 for JWT method
+  algorithm: rs256
+
+##
+# Server's instances configuration.
+instances:
+  - name: main
+    description: |
+      The 'main' server instance.
+    ##
+    # List of storage backends for the instance.
+    #  disk         - On-disk storage.
+    #  lru-storage  - In-memory storage (non-persistant).
+    #  remote       - Proxy to remote storage.
+    #  s3-storage   - Amazon S3 storage.
+    storages:
+      - !disk-storage &main-storage
+        ##
+        # Path to the local storage folder.
+        path: !expand-path $HOME/cas
+
+    ##
+    # List of schedulers to use in Execution and Bots services
+    #  sql-scheduler      - A scheduler which uses a SQLAlchemy-compatible
+    #                       database
+    #  memory-scheduler   - Legacy in-memory scheduler, not recommended
+    #                       for use in production scenarios due to lack of
+    #                       persistent state and inability to horizontally
+    #                       scale (or even share state outside a single
+    #                       configuration at all)
+    schedulers:
+      - !sql-scheduler &state-database
+        # Storage backend that results should be stored in
+        storage: *main-storage
+
+        # URI for connecting to a PostgreSQL database:
+        connection-string: postgresql://bgd:insecure@database/bgd
+        # URI for connecting to an SQLite database:
+        #connection-string: sqlite:///./example.db
+
+        ##
+        # Whether or not to automatically run database migrations
+        # when starting the server
+        automigrate: yes
+
+        # SQLAlchemy Pool Options
+        pool-size: 5
+        pool-timeout: 30
+        pool-recycle: 3600
+        max-overflow: 10
+
+      # Using an in-memory scheduler isn't recommended for long-term
+      # or production use. Using this the features that allow horizontal
+      # scaling will not function correctly, and also the job queue will
+      # be ephemeral and lost on restart.
+      - !memory-scheduler &state-in-memory
+        # Storage backend that results should be stored in
+        storage: *main-storage
+
+    ##
+    # List of services for the instance.
+    #  action-cache     - REAPI ActionCache service.
+    #  bytestream       - Google APIs ByteStream service.
+    #  cas              - REAPI ContentAddressableStorage service.
+    #  execution        - REAPI Execution + RWAPI Bots services.
+    #  reference-cache  - BuildStream ReferenceStorage service.
+    services:
+      - !action-cache &main-action
+        ##
+        # Alias to a storage backend, see 'storages'.
+        storage: *main-storage
+        ##
+        # Maximum number of entires kept in cache.
+        max-cached-refs: 256
+        ##
+        # Whether or not writing to the cache is allowed.
+        allow-updates: true
+        ##
+        # Whether failed actions (non-zero exit code) are stored.
+        cache-failed-actions: true
+
+      - !execution
+        ##
+        # Alias to a storage backend, see 'storages'.
+        storage: *main-storage
+        ##
+        # Alias to an action-cache service.
+        action-cache: *main-action
+        ##
+        # Operation Stream Keepalive Timeout: The maximum time (in seconds)
+        # to wait before sending the current status in an Operation response
+        # stream of an `Execute` or `WaitExecution` request.
+        operation-stream-keepalive-timeout: 120
+        ##
+        # BotSession Keepalive Timeout: The maximum time (in seconds)
+        # to wait to hear back from a bot before assuming they're unhealthy.
+        bot-session-keepalive-timeout: 120
+
+        ##
+        # Non-standard keys which BuildGrid will allow jobs to set and use in the
+        # scheduling algorithm when matching a job to an appropriate worker
+        #
+        # Jobs with keys which aren't defined in either this list or
+        # `wildcard-property-keys` will be rejected.
+        property-keys:
+          ##
+          # BuildGrid will match worker and jobs on foo, if set by job
+          - foo
+          ##
+          # Can specify multiple keys.
+          - bar
+
+        ##
+        # Non-standard keys which BuildGrid will allow jobs to set. These keys
+        # won't be considered when matching jobs to workers.
+        #
+        # Jobs with keys which aren't defined in either this list or
+        # `property-keys` will be rejected.
+        wildcard-property-keys:
+          ##
+          # BuildGrid won't use the `chrootDigest` property to match jobs to workers,
+          # but workers will still be able to use the value of the key to determine
+          # what environment the job needs
+          - chrootDigest
+
+        ##
+        # Base URL for external build action (web) browser service.
+        action-browser-url: http://localhost:8080
+        ##
+        # Alias to a data store used to store the scheduler's state, see 'schedulers'.
+        scheduler: *state-database
+        ##
+        # Remove operation if there are no clients currently connected watching it.
+        # (Default: false)
+        discard-unwatched-jobs: true
+        ##
+        # Max Execution Timeout: Specify the maximum amount of time (in seconds) a job
+        # can remain in executing state. If it exceeds the maximum execution timeout,
+        # it will be marked as cancelled.
+        # (Default: 7200)
+        max-execution-timeout: 7200
+        ##
+        # Max List Operations Page Size: Specify the maximum number of results that can
+        # be returned from a ListOperations request. BuildGrid will provide a page_token
+        # with the response that the client can specify to get the next page of results.
+        # (Default: 1000)
+        max-list-operation-page-size: 1000
+
+      - !cas
+        ##
+        # Alias to a storage backend, see 'storages'.
+        storage: *main-storage
+        ##
+        # Whether the CAS should be read only or not
+        read-only: false
+
+      - !bytestream
+        ##
+        # Alias to a storage backend, see 'storages'.
+        storage: *main-storage
+        ##
+        # Whether the ByteStream should be read-only
+        read-only: false
+
+      - !reference-cache
+        ##
+        # Alias to a storage backend, see 'storages'.
+        storage: *main-storage
+        ##
+        # Maximum number of entires kept in cache.
+        max-cached-refs: 256
+        ##
+        # Whether or not writing to the cache is allowed.
+        allow-updates: true
+
+##
+# Server's internal monitoring configuration.
+monitoring:
+  ##
+  # Whether or not to activate the monitoring subsytem.
+  enabled: false
+
+  ##
+  # Type of the monitoring bus endpoint.
+  #  stdout  - Standard output stream.
+  #  file    - On-disk file.
+  #  socket  - UNIX domain socket.
+  #  udp     - Port listening for UDP packets
+  endpoint-type: socket
+
+  ##
+  # Location for the monitoring bus endpoint. Only
+  # necessary for 'file', 'socket', and 'udp' `endpoint-type`.
+  # Full path is expected for 'file', name
+  # only for 'socket', and `hostname:port` for 'udp'.
+  endpoint-location: monitoring_bus_socket
+
+  ##
+  # Messages serialisation format.
+  #  binary  - Protobuf binary format.
+  #  json    - JSON format.
+  #  statsd  - StatsD format. Only metrics are kept - logs are dropped.
+  serialization-format: binary
+
+  ##
+  # Prefix to prepend to the metric name before writing
+  # to the configured endpoint.
+  metric-prefix: buildgrid
+
+##
+# Maximum number of gRPC threads. Defaults to 5 times
+# the CPU count if not specifed. A minimum of 5 is
+# enforced, whatever the configuration is.
+thread-pool-size: 20
